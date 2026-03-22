@@ -1,3 +1,5 @@
+<?php require_once __DIR__ . '/admin/api/db.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -467,15 +469,25 @@
         <h2>Frequently Asked <span class="span-orange">Questions</span></h2>
         <p>Everything you need to know about appliance repair in Nairobi.</p>
       </div>
+      
+
       <div class="faq-list" style="max-width:800px; margin:0 auto;">
-        <div class="faq-item reveal">
-          <div class="faq-question"><span>How much does fridge repair cost in Nairobi?</span><span
-              class="faq-icon">+</span></div>
-          <div class="faq-answer">Fridge repair in Nairobi typically costs <strong>KSh 1,500–8,000</strong> depending on
-            the fault. A gas refill costs KSh 3,500–6,500. A compressor replacement is KSh 6,000–12,000. We always
-            provide a free diagnosis before quoting.</div>
-        </div>
-        <div class="faq-item reveal">
+        <?php if ($result->num_rows > 0): ?>
+            <?php while($row = $result->fetch_assoc()): ?>
+                <div class="faq-item reveal">
+                    <div class="faq-question">
+                        <span><?php echo htmlspecialchars($row['question']); ?></span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <?php echo nl2br($row['answer']); ?>
+                    </div>
+                </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p>No FAQs available at the moment.</p>
+        <?php endif; ?>
+        <!-- <div class="faq-item reveal">
           <div class="faq-question"><span>Do you offer same-day appliance repair in Nairobi?</span><span
               class="faq-icon">+</span></div>
           <div class="faq-answer">Yes! VisionX offers <strong>same-day appliance repair across Nairobi</strong>. Call
@@ -509,7 +521,7 @@
               href='https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20appliance%20repair%20in%20Nairobi.%20Please%20assist.'
               style='color:var(--orange)' target='_blank'>WhatsApp us</a>. Tell us your area, appliance and fault and
             we'll arrange a technician visit — often same-day.</div>
-        </div>
+        </div> -->
       </div>
     </div>
   </section>
