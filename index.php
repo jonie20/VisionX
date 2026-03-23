@@ -1,4 +1,36 @@
-<?php require_once __DIR__ . '/admin/api/db.php'; ?>
+<?php 
+require_once __DIR__ . '/admin/api/db.php';
+
+$faqs = [];
+$reviews = [];
+
+try {
+    $stmt = db()->query("
+        SELECT question, answer 
+        FROM faqs 
+        WHERE active = 1 
+        ORDER BY sort_order ASC, id DESC
+        LIMIT 6
+    ");
+    $faqs = $stmt->fetchAll();
+} catch (Exception $e) {
+    $faqs = [];
+}
+
+
+try {
+    $stmt1 = db()->query("
+        SELECT author, rating, body, area 
+        FROM reviews 
+        WHERE status = 'approved'
+        ORDER BY id DESC
+        LIMIT 6
+    ");
+    $reviews = $stmt1->fetchAll();
+} catch (Exception $e) {
+    $reviews = [];
+}
+ ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -342,67 +374,6 @@
     </div>
   </section>
 
-  <!-- ── PRICING ── -->
-  <!-- <section class="section" id="pricing" aria-label="Appliance repair pricing Nairobi 2025">
-    <div class="container">
-      <div class="section-header center reveal">
-        <span class="label-tag">Transparent Costs</span>
-        <h2>Repair Prices in <span class="span-orange">Nairobi (2025)</span></h2>
-        <p>Honest pricing. Free diagnosis before any charges. Final quote given after we inspect your appliance.</p>
-      </div>
-      <div class="reveal">
-        <table class="pricing-table">
-          <thead>
-            <tr>
-              <th>Repair Service</th>
-              <th>Coverage</th>
-              <th>Estimated Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Fridge Not Cooling / Gas Refill</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 3,500–6,500</span></td>
-            </tr>
-            <tr>
-              <td><strong>Fridge Thermostat / PCB Board</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 2,000–5,500</span></td>
-            </tr>
-            <tr>
-              <td><strong>Fridge Compressor Replacement</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 6,000–12,000</span></td>
-            </tr>
-            <tr>
-              <td><strong>Washing Machine Drum Bearing</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 3,500–7,000</span></td>
-            </tr>
-            <tr>
-              <td><strong>Washing Machine Pump / Seal</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 1,500–4,500</span></td>
-            </tr>
-            <tr>
-              <td><strong>Microwave Magnetron</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 2,500–5,500</span></td>
-            </tr>
-            <tr>
-              <td><strong>Chest Freezer Gas Refill</strong></td>
-              <td>All Nairobi</td>
-              <td><span class="price-badge">KSh 3,500–6,500</span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="pricing-note"><strong>✅ Free Diagnosis</strong> — We inspect before charging. All repairs carry a
-          <strong>90-day warranty</strong>. No hidden fees.</div>
-      </div>
-    </div>
-  </section> -->
-
   <!-- ── COMPARE ── -->
   <section class="section bg-off" aria-label="Why choose VisionX over competitors Nairobi">
     <div class="container">
@@ -471,22 +442,21 @@
       </div>
       
 
-      <div class="faq-list" style="max-width:800px; margin:0 auto;">
-        <?php if ($result->num_rows > 0): ?>
-            <?php while($row = $result->fetch_assoc()): ?>
-                <div class="faq-item reveal">
-                    <div class="faq-question">
-                        <span><?php echo htmlspecialchars($row['question']); ?></span>
-                        <span class="faq-icon">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        <?php echo nl2br($row['answer']); ?>
-                    </div>
-                </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <p>No FAQs available at the moment.</p>
-        <?php endif; ?>
+      <?php if (!empty($faqs)): ?>
+          <?php foreach ($faqs as $faq): ?>
+              <div class="faq-item reveal">
+                  <div class="faq-question">
+                      <span><?php echo htmlspecialchars($faq['question']); ?></span>
+                      <span class="faq-icon">+</span>
+                  </div>
+                  <div class="faq-answer">
+                      <?php echo nl2br(htmlspecialchars($faq['answer'])); ?>
+                  </div>
+              </div>
+          <?php endforeach; ?>
+      <?php else: ?>
+          <p style="text-align:center;">No FAQs available at the moment.</p>
+      <?php endif; ?>
         <!-- <div class="faq-item reveal">
           <div class="faq-question"><span>Do you offer same-day appliance repair in Nairobi?</span><span
               class="faq-icon">+</span></div>
@@ -577,14 +547,43 @@
         <h2>Customer <span class="span-orange">Reviews</span></h2>
       </div>
       <div class="reviews-grid">
-        <div class="review-card reveal">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Samsung fridge stopped cooling on a Friday evening. VisionX came Saturday morning,
-            refilled the gas and it's been perfect ever since. Highly recommend!"</p>
-          <div class="review-author">James M.</div>
-          <div class="review-area">📍 Westlands, Nairobi</div>
-        </div>
-        <div class="review-card reveal">
+        <?php if (!empty($reviews)): ?>
+          <?php foreach ($reviews as $review): ?>
+
+            <div class="review-card reveal">
+
+              <!-- ⭐ Stars -->
+              <div class="review-stars">
+                <?php
+                $stars = (int)$review['rating'];
+                for ($i = 1; $i <= 5; $i++) {
+                    echo $i <= $stars ? '★' : '☆';
+                }
+                ?>
+              </div>
+
+              <!-- 💬 Message -->
+              <p class="review-text">
+                "<?php echo htmlspecialchars($review['body']); ?>"
+              </p>
+
+              <!-- 👤 Author -->
+              <div class="review-author">
+                <?php echo htmlspecialchars($review['author']); ?>
+              </div>
+
+              <!-- 📍 Area -->
+              <div class="review-area">
+                📍 <?php echo htmlspecialchars($review['area']); ?>, Nairobi
+              </div>
+
+            </div>
+
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p style="text-align:center;">No reviews available yet.</p>
+        <?php endif; ?>
+        <!-- <div class="review-card reveal">
           <div class="review-stars">★★★★★</div>
           <p class="review-text">"My LG washing machine had the UE error. Technician diagnosed and fixed it in under an
             hour. Very professional and honest with pricing."</p>
@@ -618,7 +617,7 @@
             worth it for the peace of mind."</p>
           <div class="review-author">Mary A.</div>
           <div class="review-area">📍 Parklands, Nairobi</div>
-        </div>
+        </div> -->
       </div>
       <div class="text-center mt-32 reveal">
         <a href="https://g.page/r/YOUR_GOOGLE_PLACE_ID/review" target="_blank" class="btn-outline"><i

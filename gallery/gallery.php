@@ -1,3 +1,19 @@
+<?php
+require_once __DIR__ . '/../admin/api/db.php';
+
+$gallery = [];
+
+try {
+    $stmt = db()->query("
+        SELECT * FROM gallery 
+        WHERE active = 1 
+        ORDER BY sort_order ASC, id DESC
+    ");
+    $gallery = $stmt->fetchAll();
+} catch (Exception $e) {
+    $gallery = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -217,296 +233,76 @@
     <!-- Gallery grid -->
     <div class="gallery-grid" id="gallery-grid" role="list">
 
-      <!-- ══ CARD 1 ══ -->
-      <article class="gallery-card reveal"
-        data-type="fridge" data-brand="Samsung" data-area="Westlands"
-        data-status="after" data-title="Samsung Fridge Gas Refill – Westlands"
-        data-desc="Samsung side-by-side fridge stopped cooling. Diagnosed as low refrigerant. Gas recharged and fridge back to full operation. Completed same day in Westlands, Nairobi."
-        data-fault="Not Cooling – Gas Refill"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <!-- REPLACE src with real photo path e.g: ../assets/images/gallery/samsung-fridge-westlands-01.jpg -->
-          <img src="../assets/images/gallery/fridge1.jpeg"
-               alt="Samsung fridge gas refill repair completed in Westlands Nairobi by VisionX Repairs"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🧊</div><div class=\'ph-label\'>Samsung Fridge<br>Westlands</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Fridge</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Westlands</span>
-          </div>
-          <h3>Samsung Fridge Gas Refill – Westlands</h3>
-          <p>Not cooling. Refrigerant recharged. Same-day service.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Samsung</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Samsung%20fridge%20repair%20in%20Westlands%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+      <?php if (!empty($gallery)): ?>
+        <?php foreach ($gallery as $item): ?>
 
-      <!-- ══ CARD 2 ══ -->
-      <article class="gallery-card reveal"
-        data-type="washing-machine" data-brand="LG" data-area="Kilimani"
-        data-status="after" data-title="LG Washing Machine UE Error – Kilimani"
-        data-desc="LG front-loader showing UE error (unbalanced load due to worn drum bearings). Drum bearing kit replaced. Machine now running quietly and spin cycle fully restored. Kilimani, Nairobi."
-        data-fault="UE Error – Drum Bearing Replacement"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/washing1.jpeg"
-               alt="LG washing machine UE error drum bearing repair completed in Kilimani Nairobi"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🫧</div><div class=\'ph-label\'>LG Washing Machine<br>Kilimani</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Washing Machine</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Kilimani</span>
-          </div>
-          <h3>LG Washing Machine UE Error – Kilimani</h3>
-          <p>Drum bearing replaced. Spin cycle fully restored.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> LG</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20LG%20washing%20machine%20repair%20in%20Kilimani%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+          <article class="gallery-card reveal"
+            data-type="<?php echo htmlspecialchars($item['appliance']); ?>"
+            data-brand="<?php echo htmlspecialchars($item['brand']); ?>"
+            data-area="<?php echo htmlspecialchars($item['area']); ?>"
+            data-status="<?php echo htmlspecialchars($item['status']); ?>"
+            data-title="<?php echo htmlspecialchars($item['title']); ?>"
+            data-desc="<?php echo htmlspecialchars($item['description']); ?>"
+            data-fault="<?php echo htmlspecialchars($item['fault']); ?>"
+            role="listitem">
 
-      <!-- ══ CARD 3 ══ -->
-      <article class="gallery-card reveal"
-        data-type="fridge" data-brand="Bosch" data-area="Karen"
-        data-status="after" data-title="Bosch Fridge Thermostat Replacement – Karen"
-        data-desc="Bosch fridge not maintaining temperature. PCB thermostat board replaced with compatible part. Tested to spec. Completed in Karen, Nairobi with 90-day warranty."
-        data-fault="Not Cooling – Thermostat/PCB Replacement"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/fridge2.jpeg"
-               alt="Bosch fridge thermostat PCB board replacement repair Karen Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🧊</div><div class=\'ph-label\'>Bosch Fridge<br>Karen</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Fridge</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Karen</span>
-          </div>
-          <h3>Bosch Fridge Thermostat Replacement – Karen</h3>
-          <p>PCB board replaced. Temperature fully restored.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Bosch</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Bosch%20fridge%20repair%20in%20Karen%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+            <div class="gc-img-wrap">
+              <img src="../<?php echo htmlspecialchars($item['img_path']); ?>"
+                  alt="<?php echo htmlspecialchars($item['img_alt'] ?: $item['title']); ?>"
+                  loading="lazy" width="400" height="300">
 
-      <!-- ══ CARD 5 ══ -->
-      <article class="gallery-card reveal"
-        data-type="microwave" data-brand="LG" data-area="Lavington"
-        data-status="after" data-title="LG Microwave Not Heating – Lavington"
-        data-desc="LG microwave running but not heating. Diagnosed as blown magnetron diode. Diode and capacitor replaced. Microwave fully restored and door interlock tested for safety. Lavington, Nairobi."
-        data-fault="Not Heating – Magnetron Diode &amp; Capacitor"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/microwave.jpeg"
-               alt="LG microwave not heating magnetron diode repair Lavington Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>📡</div><div class=\'ph-label\'>LG Microwave<br>Lavington</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Microwave</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Lavington</span>
-          </div>
-          <h3>LG Microwave Not Heating – Lavington</h3>
-          <p>Magnetron diode replaced. Heating fully restored.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> LG</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20LG%20microwave%20repair%20in%20Lavington%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+              <div class="gc-overlay">
+                <div class="gc-overlay-icon"><i class="fas fa-expand"></i></div>
+              </div>
 
-      <!-- ══ CARD 6 ══ -->
-      <article class="gallery-card reveal"
-        data-type="washing-machine" data-brand="Samsung" data-area="Parklands"
-        data-status="after" data-title="Samsung Washer Door Seal + Pump – Parklands"
-        data-desc="Samsung front-loader leaking from door and draining slowly. Door boot seal replaced and drain pump cleared of blockage. Machine leak-free and draining in under 3 minutes. Parklands, Nairobi."
-        data-fault="Leaking + Slow Drain – Door Seal &amp; Pump"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/washing-repair.jpeg"
-               alt="Samsung washing machine door seal and drain pump repair Parklands Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🫧</div><div class=\'ph-label\'>Samsung Washer<br>Parklands</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Washing Machine</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Parklands</span>
-          </div>
-          <h3>Samsung Washer Door Seal + Pump – Parklands</h3>
-          <p>Leaking door sealed, drain pump cleared. Leak-free.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Samsung</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Samsung%20washing%20machine%20repair%20in%20Parklands%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+              <span class="gc-status <?php echo $item['status'] === 'before' ? 'before' : 'after'; ?>">
+                <?php echo $item['status'] === 'before' ? 'Before' : '✓ Fixed'; ?>
+              </span>
+            </div>
 
-      <!-- ══ CARD 7 ══ -->
-      <article class="gallery-card reveal"
-        data-type="fridge" data-brand="Whirlpool" data-area="Kasarani"
-        data-status="before" data-title="Whirlpool Fridge Compressor Failure – Kasarani (Before)"
-        data-desc="Whirlpool fridge completely failed to cool. Compressor found seized on diagnosis. Photo taken before repair. Compressor was subsequently replaced — see After photo."
-        data-fault="Not Cooling – Seized Compressor (Before Repair)"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/placeholder.jpg"
-               alt="Whirlpool fridge compressor failure before repair Kasarani Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🧊</div><div class=\'ph-label\'>Whirlpool Fridge<br>Kasarani – Before</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status before">Before</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Fridge</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Kasarani</span>
-          </div>
-          <h3>Whirlpool Fridge Compressor – Kasarani (Before)</h3>
-          <p>Seized compressor. Full replacement carried out same-day.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Whirlpool</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Whirlpool%20fridge%20repair%20in%20Kasarani%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+            <div class="gc-body">
+              <div class="gc-meta">
+                <span class="gc-tag">
+                  <?php echo ucfirst(str_replace('-', ' ', $item['appliance'])); ?>
+                </span>
+                <span class="gc-area">
+                  <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($item['area']); ?>
+                </span>
+              </div>
 
-      <!-- ══ CARD 8 ══ -->
-      <article class="gallery-card reveal"
-        data-type="fridge" data-brand="Whirlpool" data-area="Kasarani"
-        data-status="after" data-title="Whirlpool Fridge Compressor Replacement – Kasarani (After)"
-        data-desc="New compatible compressor installed in Whirlpool fridge. Tested at correct operating pressure. Fridge back to full cooling within 2 hours. 90-day warranty on compressor and labour."
-        data-fault="Compressor Replaced – Fully Restored (After Repair)"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/placeholder.jpg"
-               alt="Whirlpool fridge compressor replaced after repair Kasarani Nairobi VisionX Repairs"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>✅</div><div class=\'ph-label\'>Whirlpool Fridge<br>Kasarani – After</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Fridge</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Kasarani</span>
-          </div>
-          <h3>Whirlpool Fridge Compressor – Kasarani (After)</h3>
-          <p>Compressor replaced. Full cooling restored with 90-day warranty.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Whirlpool</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Whirlpool%20fridge%20repair%20in%20Kasarani%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+              <h3><?php echo htmlspecialchars($item['title']); ?></h3>
 
-      <!-- ══ CARD 9 ══ -->
-      <article class="gallery-card reveal"
-        data-type="fridge" data-brand="Hisense" data-area="Langata"
-        data-status="after" data-title="Hisense Fridge Ice Build-Up Fix – Langata"
-        data-desc="Hisense fridge had excessive ice build-up in the freezer compartment and water pooling at the bottom. Defrost heater and drain tube cleared. Defrost timer replaced. Langata, Nairobi."
-        data-fault="Ice Build-Up – Defrost Heater &amp; Drain"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/placeholder.jpg"
-               alt="Hisense fridge ice build-up defrost heater repair Langata Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🧊</div><div class=\'ph-label\'>Hisense Fridge<br>Langata</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Fridge</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Langata</span>
-          </div>
-          <h3>Hisense Fridge Ice Build-Up Fix – Langata</h3>
-          <p>Defrost heater + drain cleared. Ice-free operation restored.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Hisense</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Hisense%20fridge%20repair%20in%20Langata%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+              <p>
+                <?php 
+                echo htmlspecialchars(
+                  strlen($item['description']) > 80 
+                    ? substr($item['description'], 0, 80) . '...' 
+                    : $item['description']
+                ); 
+                ?>
+              </p>
+            </div>
 
-      <!-- ══ CARD 10 ══ -->
-      <article class="gallery-card reveal"
-        data-type="washing-machine" data-brand="Bosch" data-area="Kilimani"
-        data-status="after" data-title="Bosch Washer E18 Drain Error – Kilimani"
-        data-desc="Bosch washing machine stuck on E18 error (drain fault). Pump filter blocked solid. Filter cleared, pump tested and machine running full cycles. Kilimani, Nairobi."
-        data-fault="E18 Error – Drain Pump Filter Cleared"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/placeholder.jpg"
-               alt="Bosch washing machine E18 drain error pump filter repair Kilimani Nairobi VisionX"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>🫧</div><div class=\'ph-label\'>Bosch Washer<br>Kilimani</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Washing Machine</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Kilimani</span>
-          </div>
-          <h3>Bosch Washer E18 Error – Kilimani</h3>
-          <p>Drain pump filter cleared. E18 error resolved same-day.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Bosch</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Bosch%20washing%20machine%20repair%20in%20Kilimani%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+            <div class="gc-footer">
+              <span class="gc-brand">
+                <i class="fas fa-tag"></i> <?php echo htmlspecialchars($item['brand']); ?>
+              </span>
 
-      <!-- ══ CARD 11 ══ -->
-      <article class="gallery-card reveal"
-        data-type="microwave" data-brand="Ramtons" data-area="Westlands"
-        data-status="after" data-title="Ramtons Microwave Control Board – Westlands"
-        data-desc="Ramtons microwave touchpad completely unresponsive. Control board replaced with compatible unit. All programs functioning. Tested before handover. Westlands, Nairobi."
-        data-fault="Unresponsive Touchpad – Control Board"
-        role="listitem">
-        <div class="gc-img-wrap">
-          <img src="../assets/images/gallery/placeholder.jpg"
-               alt="Ramtons microwave control board touchpad repair Westlands Nairobi VisionX Repairs"
-               onerror="this.parentElement.innerHTML='<div class=\'gc-placeholder\'><div class=\'ph-icon\'>📡</div><div class=\'ph-label\'>Ramtons Microwave<br>Westlands</div></div>'"
-               loading="lazy" width="400" height="300">
-          <div class="gc-overlay"><div class="gc-overlay-icon"><i class="fas fa-expand"></i></div></div>
-          <span class="gc-status after">✓ Fixed</span>
-        </div>
-        <div class="gc-body">
-          <div class="gc-meta">
-            <span class="gc-tag">Microwave</span>
-            <span class="gc-area"><i class="fas fa-map-marker-alt"></i> Westlands</span>
-          </div>
-          <h3>Ramtons Microwave Control Board – Westlands</h3>
-          <p>Control board replaced. All programs restored.</p>
-        </div>
-        <div class="gc-footer">
-          <span class="gc-brand"><i class="fas fa-tag"></i> Ramtons</span>
-          <a href="https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20Ramtons%20microwave%20repair%20in%20Westlands%20Nairobi." target="_blank" class="gc-wa-btn"><i class="fab fa-whatsapp"></i> Book Same Repair</a>
-        </div>
-      </article>
+              <a href="https://api.whatsapp.com/send?phone=254797340140&text=<?php 
+                  echo urlencode('Hello! I need ' . $item['title'] . ' repair in ' . $item['area'] . ', Nairobi.'); 
+              ?>"
+                target="_blank"
+                class="gc-wa-btn">
+                <i class="fab fa-whatsapp"></i> Book Same Repair
+              </a>
+            </div>
+
+          </article>
+
+        <?php endforeach; ?>
+      <?php else: ?>
+        <p style="text-align:center;">No gallery items found.</p>
+      <?php endif; ?>
 
       <!-- ══ CARD 12 – Upload Placeholder ══ -->
       <div class="gallery-upload-cta reveal" data-type="upload" role="listitem">
