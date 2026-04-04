@@ -1,0 +1,1 @@
+<?php $_GET['action'] = 'save';   require __DIR__ . '/gallery.php';

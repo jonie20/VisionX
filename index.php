@@ -1,8 +1,9 @@
 <?php 
 require_once __DIR__ . '/admin/api/db.php';
 
-$faqs = [];
+$faqs    = [];
 $reviews = [];
+$gallery = [];
 
 try {
     $stmt = db()->query("
@@ -17,7 +18,6 @@ try {
     $faqs = [];
 }
 
-
 try {
     $stmt1 = db()->query("
         SELECT author, rating, body, area 
@@ -30,6 +30,28 @@ try {
 } catch (Exception $e) {
     $reviews = [];
 }
+
+try {
+    $stmt2 = db()->query("
+        SELECT id, title, brand, area, appliance, img_path, img_alt, fault
+        FROM gallery
+        WHERE active = 1
+          AND status = 'after'
+        ORDER BY sort_order ASC, id DESC
+        LIMIT 4
+    ");
+    $gallery = $stmt2->fetchAll();
+} catch (Exception $e) {
+    $gallery = [];
+}
+
+/* Map appliance enum → FontAwesome icon class + label */
+$applianceIcon = [
+    'fridge'          => ['icon' => 'fa-snowflake',      'label' => 'Fridge Repair'],
+    'washing-machine' => ['icon' => 'fa-tshirt',         'label' => 'Washing Machine'],
+    'microwave'       => ['icon' => 'fa-broadcast-tower','label' => 'Microwave'],
+    'freezer'         => ['icon' => 'fa-thermometer-empty', 'label' => 'Freezer'],
+];
  ?>
 
 <!DOCTYPE html>
@@ -54,7 +76,7 @@ try {
     content="Expert fridge, washing machine & microwave repair in Nairobi. Serving Westlands, Kilimani, Karen, Embakasi & more. Same-day service. All brands. 90-day warranty. Call +254 797 340 140.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.visionxrepairs.co.ke/">
-  <meta property="og:image" content="https://www.visionxrepairs.co.ke/assets/images/main.png">
+  <meta property="og:image" content="https://www.visionxrepairs.co.ke/assets/images/hero-technician.jpg">
   <meta property="og:locale" content="en_KE">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Appliance Repair in Nairobi | VisionX Repairs – Same-Day, Affordable Service">
@@ -73,7 +95,13 @@ try {
   "openingHours":"Mo-Su 07:00-20:00",
   "priceRange":"KSh 1,500 - KSh 15,000",
   "areaServed":["Westlands","Kilimani","Karen","Embakasi","Lavington","Parklands","Kasarani","Langata"],
-  "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"89"}
+  "aggregateRating":{"@type":"AggregateRating","ratingValue":"4.9","reviewCount":"89"},
+  "image":[
+    "https://www.visionxrepairs.co.ke/assets/images/repairs/fridge-repair-nairobi.jpg",
+    "https://www.visionxrepairs.co.ke/assets/images/repairs/washing-machine-repair-nairobi.jpg",
+    "https://www.visionxrepairs.co.ke/assets/images/repairs/microwave-repair-nairobi.jpg",
+    "https://www.visionxrepairs.co.ke/assets/images/repairs/commercial-fridge-repair-nairobi.jpg"
+  ]
 }</script>
   <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
     integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
@@ -85,7 +113,152 @@ try {
     href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet">
   <style>
-    
+    /* ── HERO IMAGE ── */
+    .hero-img-wrap {
+      position: relative;
+      border-radius: 20px;
+      overflow: visible;
+      width: 100%;
+      max-width: 560px;
+    }
+    .hero-img-wrap img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      border-radius: 20px;
+      display: block;
+      box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    }
+    /* Fallback when image is missing */
+    .hero-img-wrap.hero-img-fallback {
+      height: 480px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #e85d04 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 80px;
+    }
+    .hero-img-wrap.hero-img-fallback::after {
+      content: '🔧';
+    }
+    .hero-img-wrap.hero-img-fallback img { display: none; }
+
+    /* Floating badge base */
+    .hero-badge {
+      position: absolute;
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.22);
+      white-space: nowrap;
+      animation: badge-float 3s ease-in-out infinite;
+    }
+    .hero-badge strong { display:block; font-size:13px; font-weight:700; color:#0f0f0f; line-height:1.2; }
+    .hero-badge span   { display:block; font-size:11px; color:#888; }
+    .hb-icon { font-size: 22px; }
+
+    /* Positions */
+    .hero-badge--tl { top: 24px; left: -28px; animation-delay: 0s; }
+    .hero-badge--br { bottom: 40px; right: -28px; animation-delay: 1.1s; }
+    .hero-badge--rating {
+      bottom: -18px; left: 50%; transform: translateX(-50%);
+      flex-direction: column; align-items: center; gap: 2px;
+      padding: 10px 20px;
+      animation-delay: 0.6s;
+    }
+    .hb-stars { color: #f59e0b; font-size: 16px; letter-spacing: 2px; }
+    .hb-rcount { font-size: 11px; color: #555; font-weight: 600; }
+
+    @keyframes badge-float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+    .hero-badge--rating {
+      animation-name: badge-float-centered;
+    }
+    @keyframes badge-float-centered {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(-6px); }
+    }
+
+    /* Responsive: hide side badges on small screens */
+    @media (max-width: 768px) {
+      .hero-badge--tl, .hero-badge--br { display: none; }
+      .hero-badge--rating { bottom: 12px; }
+      .hero-img-wrap img, .hero-img-wrap.hero-img-fallback { height: 300px; }
+    }
+
+    /* ── PROOF / IMAGE SECTION ── */
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+    }
+    @media (max-width: 1024px) { .proof-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .proof-grid { grid-template-columns: 1fr; } }
+
+    .proof-card {
+      border-radius: var(--radius, 14px);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .proof-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,.14); }
+
+    .proof-img-wrap {
+      position: relative;
+      margin: 0;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      background: #f5f5f5;
+    }
+    .proof-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+    .proof-card:hover .proof-img-wrap img { transform: scale(1.04); }
+
+    /* Fallback placeholder when image is missing */
+    .proof-img-wrap.img-fallback {
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #fff3e6 0%, #ffe0c4 100%);
+    }
+    .proof-img-wrap.img-fallback::after {
+      content: '🔧';
+      font-size: 56px;
+    }
+
+    .proof-badge {
+      position: absolute;
+      bottom: 10px; left: 10px;
+      background: var(--orange, #e85d04);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 20px;
+      display: flex; align-items: center; gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .proof-caption {
+      padding: 14px 16px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .proof-caption strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark, #0f0f0f);
+    }
+    .proof-caption span {
+      font-size: 12px;
+      color: var(--muted, #888);
+    }
   </style>
 </head>
 <script
@@ -197,28 +370,86 @@ try {
         </div>
       </div>
       <div class="home-hero-visual">
-        <div class="visual-card">
-          <div class="vc-icon">🧊</div>
-          <div class="vc-text">
-            <h4>Fridge Repair Nairobi</h4>
-            <p>Same-day · All brands · 90-day warranty</p>
+        <div class="hero-img-wrap">
+          <img
+            src="assets/images/hero-technician.jpg"
+            alt="VisionX certified appliance repair technician fixing a fridge in a Nairobi home"
+            width="600" height="520"
+            fetchpriority="high"
+            onerror="this.closest('.hero-img-wrap').classList.add('hero-img-fallback')"
+          >
+          <!-- Floating trust badges -->
+          <div class="hero-badge hero-badge--tl">
+            <span class="hb-icon">🛡️</span>
+            <div><strong>90-Day Warranty</strong><span>Parts &amp; labour</span></div>
           </div>
-        </div>
-        <div class="visual-card">
-          <div class="vc-icon">🫧</div>
-          <div class="vc-text">
-            <h4>Washing Machine Repair</h4>
-            <p>Front &amp; top load · Error codes cleared</p>
+          <div class="hero-badge hero-badge--br">
+            <span class="hb-icon">⚡</span>
+            <div><strong>Same-Day Service</strong><span>Call before noon</span></div>
           </div>
-        </div>
-        <div class="visual-card">
-          <div class="vc-icon">📡</div>
-          <div class="vc-text">
-            <h4>Microwave Repair Nairobi</h4>
-            <p>All brands · Fast turnaround</p>
+          <div class="hero-badge hero-badge--rating">
+            <span class="hb-stars">★★★★★</span>
+            <span class="hb-rcount">4.9 · 89 reviews</span>
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ── SOCIAL PROOF IMAGE STRIP ── -->
+  <section class="section section-proof" aria-label="VisionX appliance repair technicians at work in Nairobi">
+    <div class="container">
+      <div class="section-header center reveal">
+        <span class="label-tag">Real Repairs. Real Nairobi Homes.</span>
+        <h2>See Our <span class="span-orange">Work in Action</span></h2>
+        <p>Every photo is a real repair — taken at a customer's home in Nairobi. No stock photos, just results.</p>
+      </div>
+      <div class="proof-grid">
+
+        <?php if (!empty($gallery)): ?>
+          <?php foreach ($gallery as $item): ?>
+            <?php
+              $appliance = $item['appliance'] ?? 'fridge';
+              $meta      = $applianceIcon[$appliance] ?? ['icon' => 'fa-tools', 'label' => 'Repair'];
+              $alt       = !empty($item['img_alt'])
+                             ? htmlspecialchars($item['img_alt'])
+                             : htmlspecialchars($item['title'] . ' – VisionX Repairs Nairobi');
+              $caption   = trim($item['area'] ?? '');
+              if (!empty($item['fault'])) {
+                  $caption .= ($caption ? ' · ' : '') . htmlspecialchars($item['fault']);
+              }
+            ?>
+            <div class="proof-card reveal">
+              <figure class="proof-img-wrap">
+                <img
+                  src="<?php echo htmlspecialchars($item['img_path']); ?>"
+                  alt="<?php echo $alt; ?>"
+                  width="480" height="360"
+                  loading="lazy"
+                  onerror="this.closest('.proof-img-wrap').classList.add('img-fallback')"
+                >
+                <figcaption class="proof-badge">
+                  <i class="fas <?php echo $meta['icon']; ?>"></i>
+                  <?php echo $meta['label']; ?>
+                </figcaption>
+              </figure>
+              <div class="proof-caption">
+                <strong><?php echo htmlspecialchars($item['title']); ?></strong>
+                <?php if ($caption): ?>
+                  <span><?php echo $caption; ?></span>
+                <?php endif; ?>
+              </div>
+            </div>
+          <?php endforeach; ?>
+
+        <?php else: ?>
+          <p style="text-align:center;grid-column:1/-1;color:var(--muted);">Gallery images coming soon.</p>
+        <?php endif; ?>
+
+      </div>
+      <p class="text-center mt-24" style="font-size:14px;color:var(--muted);">
+        Want to see more? <a href="gallery/gallery.html" style="color:var(--orange);font-weight:700;">View the full repair gallery →</a>
+      </p>
     </div>
   </section>
 
@@ -457,41 +688,6 @@ try {
       <?php else: ?>
           <p style="text-align:center;">No FAQs available at the moment.</p>
       <?php endif; ?>
-        <!-- <div class="faq-item reveal">
-          <div class="faq-question"><span>Do you offer same-day appliance repair in Nairobi?</span><span
-              class="faq-icon">+</span></div>
-          <div class="faq-answer">Yes! VisionX offers <strong>same-day appliance repair across Nairobi</strong>. Call
-            before noon and we'll dispatch a technician to your home the same day. We cover Westlands, Kilimani, Karen,
-            Embakasi, Lavington, Parklands, Kasarani, Langata and all Nairobi areas.</div>
-        </div>
-        <div class="faq-item reveal">
-          <div class="faq-question"><span>Which brands do you repair in Nairobi?</span><span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">We repair <strong>all major appliance brands</strong> in Nairobi: Samsung, LG, Bosch,
-            Whirlpool, Von Hotpoint, Ramtons, Hisense, Bruhm, Mika, GE, Electrolux, Panasonic, Beko, Siemens and more.
-          </div>
-        </div>
-        <div class="faq-item reveal">
-          <div class="faq-question"><span>Is there a warranty on your repairs?</span><span class="faq-icon">+</span>
-          </div>
-          <div class="faq-answer">Yes — every VisionX repair in Nairobi comes with a <strong>90-day warranty</strong> on
-            parts and labour. If the same fault returns within 90 days, we fix it at no charge.</div>
-        </div>
-        <div class="faq-item reveal">
-          <div class="faq-question"><span>Do you repair commercial fridges in Nairobi?</span><span
-              class="faq-icon">+</span></div>
-          <div class="faq-answer">Yes — we repair commercial refrigerators, display coolers, and walk-in cold rooms for
-            Nairobi restaurants, supermarkets, hospitals, and offices. <a href='service/commercial/index.html'
-              style='color:var(--orange)'>Learn more about commercial repair →</a></div>
-        </div>
-        <div class="faq-item reveal">
-          <div class="faq-question"><span>How do I book a repair?</span><span class="faq-icon">+</span></div>
-          <div class="faq-answer">Simply <a href='tel:+254797340140' style='color:var(--orange)'>call +254797340140</a>
-            or <a
-              href='https://api.whatsapp.com/send?phone=254797340140&text=Hello%21%20I%20need%20appliance%20repair%20in%20Nairobi.%20Please%20assist.'
-              style='color:var(--orange)' target='_blank'>WhatsApp us</a>. Tell us your area, appliance and fault and
-            we'll arrange a technician visit — often same-day.</div>
-        </div> -->
       </div>
     </div>
   </section>
@@ -583,41 +779,6 @@ try {
         <?php else: ?>
           <p style="text-align:center;">No reviews available yet.</p>
         <?php endif; ?>
-        <!-- <div class="review-card reveal">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"My LG washing machine had the UE error. Technician diagnosed and fixed it in under an
-            hour. Very professional and honest with pricing."</p>
-          <div class="review-author">Aisha K.</div>
-          <div class="review-area">📍 Kilimani, Nairobi</div>
-        </div>
-        <div class="review-card reveal">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Called at 8pm for emergency fridge repair. They were at my door by 10pm. Incredible
-            service — saved all my food!"</p>
-          <div class="review-author">Peter N.</div>
-          <div class="review-area">📍 Karen, Nairobi</div>
-        </div>
-        <div class="review-card reveal">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Bosch washing machine drum bearing replaced. Fair price, great workmanship. 90-day
-            warranty gave me confidence. Will use again."</p>
-          <div class="review-author">Grace W.</div>
-          <div class="review-area">📍 Embakasi, Nairobi</div>
-        </div>
-        <div class="review-card reveal">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text">"They repaired my Von Hotpoint chest freezer that other repairers said was beyond
-            repair. Brilliant technicians."</p>
-          <div class="review-author">David O.</div>
-          <div class="review-area">📍 Lavington, Nairobi</div>
-        </div>
-        <div class="review-card reveal">
-          <div class="review-stars">★★★★☆</div>
-          <p class="review-text">"Quick response, good communication, fixed microwave same day. Slightly pricey but
-            worth it for the peace of mind."</p>
-          <div class="review-author">Mary A.</div>
-          <div class="review-area">📍 Parklands, Nairobi</div>
-        </div> -->
       </div>
       <div class="text-center mt-32 reveal">
         <a href="https://g.page/r/YOUR_GOOGLE_PLACE_ID/review" target="_blank" class="btn-outline"><i

@@ -247,7 +247,7 @@ try {
             role="listitem">
 
             <div class="gc-img-wrap">
-              <img src="../<?php echo htmlspecialchars($item['img_path']); ?>"
+              <img src="/visionx/<?php echo htmlspecialchars($item['img_path']); ?>"
                   alt="<?php echo htmlspecialchars($item['img_alt'] ?: $item['title']); ?>"
                   loading="lazy" width="400" height="300">
 
